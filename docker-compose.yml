@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  # 1. Database container (SQL Server)
+  database:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: taskmgmt-db
+    restart: always
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=YourStrong@Password123!
+    ports:
+      - "1433:1433"
+    volumes:
+      - sql_volume:/var/opt/mssql
+
+  # 2. .NET 8 Backend API container
+  api:
+    build:
+      context: .
+      dockerfile: src/TaskManagement.API/Dockerfile
+    container_name: taskmgmt-api
+    restart: always
+    depends_on:
+      - database
+    ports:
+      - "7053:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Server=database,1433;Database=TeamTaskManagementDb;User Id=sa;Password=YourStrong@Password123!;TrustServerCertificate=True;MultipleActiveResultSets=true;
+      - Jwt__Key=TeamTaskManagementSecretKey@#ChervicRemote
+      - Jwt__Issuer=TaskManagementAPI
+      - Jwt__Audience=TaskManagementClient
+      - Jwt__DurationInMinutes=15
+
+  # 3. React Frontend container
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: taskmgmt-frontend
+    restart: always
+    depends_on:
+      - api
+    ports:
+      - "3000:80"
+
+volumes:
+  sql_volume:
