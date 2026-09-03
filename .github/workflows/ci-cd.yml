@@ -27,7 +27,7 @@ jobs:
         run: dotnet build TeamTaskManagement.sln --no-restore -c Release
 
       - name: Execute xUnit Tests
-        run: dotnet test tests/TaskManagement.Tests/TaskManagement.Tests.csproj --no-build -c Release --verbosity normal
+        run: dotnet test tests/TaskManagement.Tests/tests/TaskManagement.Tests.csproj --no-build -c Release --verbosity normal
 
   frontend-ci:
     name: Frontend Lint & Build
